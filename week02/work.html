@@ -1,0 +1,38 @@
+<script>
+  (function(){
+    //数字正则
+    let numberReg = /^[+-]?((\.\d+|\d+\.?)\d*([eE][+-]?\d)?\d*|0[bB][01]+|0[oO][0-7]+|0[xX][0-9a-eA-E]+)$/;
+    //UTF-8
+    function encodeUTF8(str){
+      let res = '';
+      for(let i = 0,len = str.length; i < len; i++){
+        let code = str.charCodeAt(i).toString(2);
+        if(code.length <= 7){
+          let leading = new Array(7-code.length).fill(0).join();
+          res += '0x'+ Number.parseInt(0 + leading + code,2).toString(16);
+          continue
+        }
+        code = new Array(8 - (code.length % 8)).fill(0).join('') + code;
+        let bit = Math.ceil(code.length/6);
+        if(code.length%6 > 8-bit-1) bit ++;
+       
+        let headLen = 8-bit-1;
+        let head = new Array(bit).fill(1).join('')+0+code.substring(0,headLen);
+        res += Number.parseInt(head,2).toString(16);
+        let flag = 0;
+        while(flag<bit-1){
+          let str = code.substr(headLen+flag*6,6);
+          let mid = '10'+str + new Array(8-2-str.length).fill(0).join();
+          res += '0x'+Number.parseInt(mid,2).toString(16);
+          console.log(Number.parseInt(mid,2).toString(16))
+          flag++;
+        }
+
+      }
+      return res;
+    }
+    console.log(encodeUTF8('winter is coming中'))
+    //字符串正则
+    let strReg = /^('"`)$1$/;
+  })()
+</script>
