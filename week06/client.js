@@ -1,5 +1,5 @@
 const net = require('net')
-
+const toyHtml = require('./htmlParser')
 const EOF = Symbol('EOF');
 //request中目前支持的content-type类型
 const supportedContentTypes = {
@@ -35,7 +35,6 @@ class Request{
   }
   send(){
     return new Promise((resolve,reject) => {
-      console.log(this.toString())
       const connection = net.createConnection({
         host: this.host,
         port: this.port
@@ -45,10 +44,10 @@ class Request{
       })
       connection.on('data',(data)=>{
         let parser = new ResponseParser();
-        console.log(data.toString())
         parser.receive(data.toString())
-
-        console.log(JSON.stringify(parser.response))
+        if(parser.isFinished){
+          resolve(parser.response)
+        }
       })
       connection.on('error',(e)=>{
         reject(e)
@@ -86,7 +85,6 @@ class ResponseParser {
   }
   receive(str){
     for(let c of str){
-      console.log(c)
       this.state = this.state(c)
     }
   }
@@ -195,4 +193,6 @@ void async function () {
   });
 
   var res = await request.send()
+  let tree = toyHtml.parse(res.content)
+  console.log(JSON.stringify(tree))
 }();
