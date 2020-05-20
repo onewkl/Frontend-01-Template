@@ -23,5 +23,8 @@
   },
   "devDependencies": {
     "cz-customizable": "^6.2.0"
+  },
+  "dependencies": {
+    "css": "^2.2.4"
   }
 }

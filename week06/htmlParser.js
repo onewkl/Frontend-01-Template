@@ -1,4 +1,5 @@
 const EOF = Symbol('EOF')
+const toyCss = require('./cssParser')
 
 let currentToken;
 let currentAttrName = '';
@@ -12,15 +13,21 @@ function emit(token){
     let element = {
       type: 'element',
       tagName: token.tagName,
-      attributes:[],
-      children:[]
-      
+      attributes:{},
+      children:[],
+      computedStyle:{}
     }
-    Object.keys(token).forEach(k => k!='type' && k!='isSelfClosing' && k!='tagName' && element.attributes.push({[k]:token[k]}))
+    Object.keys(token).forEach(k => k!='type' && k!='isSelfClosing' && k!='tagName' && (element.attributes[k] = token[k]))
     if(top.type == 'text'){
       stack.pop();
       top = stack[stack.length-1];
     }
+    element.parent = top;
+    toyCss.computeCss(element)
+    console.log('=========================')
+    console.log(JSON.stringify(element.tagName))
+    console.log(JSON.stringify(element.computedStyle))
+    console.log('==========================')
     top.children.push(element)
     if(token.isSelfClosing !==true){
       stack.push(element)
@@ -40,6 +47,9 @@ function emit(token){
       throw '标签不匹配'
     }
     currentTextNode = null;
+    if(top.tagName == 'style'){
+      toyCss.parse(top.children[0] && top.children[0].content);
+    }
     stack.pop()
   }else if(token.type == 'EOF'){
     parsedTree = stack[0]
